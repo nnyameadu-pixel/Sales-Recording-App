@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Currency Sales Manager</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8f9fa; color: #333; line-height: 1.6; padding-bottom: 40px; }
+       
+        .navbar { background: #1a252f; color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { font-size: 1.5rem; font-weight: 600; }
+       
+        .main-container { max-width: 950px; margin: 2rem auto; padding: 0 1rem; }
+       
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+        .stat-card h3 { font-size: 0.9rem; color: #6c757d; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .stat-card p { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 2rem; }
+        .card-title { font-size: 1.2rem; color: #2c3e50; margin-bottom: 1rem; font-weight: 600; }
+       
+        form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; }
+        input, select { padding: 0.65rem; border: 1px solid #ced4da; border-radius: 5px; font-size: 0.95rem; outline: none; }
+        input:focus, select:focus { border-color: #3498db; }
+       
+        button { background: #27ae60; color: white; border: none; padding: 0.65rem 1.2rem; border-radius: 5px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #219150; }
+       
+        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+        th, td { padding: 0.85rem; text-align: left; border-bottom: 1px solid #e9ecef; }
+        th { background-color: #f1f3f5; color: #495057; font-weight: 600; }
+       
+        .btn-delete { color: #e74c3c; text-decoration: none; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 3px; }
+        .btn-delete:hover { background: #fdf2f2; }
+        .empty-msg { text-align: center; color: #868e96; padding: 2rem 0; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1>Store Manager | Multi-Currency Sales Recorder</h1>
+    </div>
+
+    <div class="main-container">
+       
+        <!-- Dashboard Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Items Sold</h3>
+                <p>{{ sales|length }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Grand Revenue</h3>
+                <p>{{ currency }} {{ "%.2f"|format(grand_total) }}</p>
+            </div>
+        </div>
+
+        <!-- Sales Entry Form -->
+        <div class="card">
+            <h2 class="card-title">Record New Sale</h2>
+            <form action="/add" method="POST">
+                <input type="text" name="product" placeholder="Product Name" required>
+                <input type="number" name="quantity" placeholder="Quantity" min="1" required>
+                <input type="number" name="price" step="0.01" placeholder="Price" min="0" required>
+               
+                <!-- Currency Selection Dropdown -->
+                <select name="currency" required>
+                    <option value="GH₵">GH₵ (Ghana Cedi)</option>
+                    <option value="$">$ (USD)</option>
+                    <option value="€">€ (Euro)</option>
+                    <option value="£">£ (GBP)</option>
+                    <option value="₦">₦ (Naira)</option>
+                </select>
+
+                <button type="submit">+ Add Entry</button>
+            </form>
+        </div>
+
+        <!-- Sales History Table -->
+        <div class="card">
+            <h2 class="card-title">Recorded Transactions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td><strong>{{ sale.product }}</strong></td>
+                        <td>{{ sale.quantity }}</td>
+                        <td>{{ sale.currency }} {{ "%.2f"|format(sale.price) }}</td>
+                        <td>{{ sale.currency }} {{ "%.2f"|format(sale.total) }}</td>
+                        <td><a href="/delete/{{ loop.index0 }}" class="btn-delete">Remove</a></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-msg">No transactions recorded for this session.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>
